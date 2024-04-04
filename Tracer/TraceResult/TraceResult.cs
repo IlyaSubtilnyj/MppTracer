@@ -4,13 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tracer;
-
-public class TraceResult
+namespace Tracer.TraceResult
 {
-
-    private readonly String Method;
-    
-    private readonly String Class;
-
+    public class TraceResult {
+        
+    }
 }

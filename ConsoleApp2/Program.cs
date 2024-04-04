@@ -1,18 +1,18 @@
 ﻿using System.Diagnostics;
-using Tracer;
+using Trace = Tracer.TraceResult;
 
 namespace ConsoleApp2;
 
 class Program
 {
 
-    private static readonly MyTracer Tracer = new();
+    private static readonly Tracer.Tracer Tracer = new();
 
     private static void M2()
     {
         Tracer.StartTrace();
 
-        Thread.Sleep(2000);
+        Thread.Sleep(1000);
 
         Tracer.StopTrace();
     }
@@ -30,11 +30,11 @@ class Program
     public static void Main(string[] args)
     {
         
-        Thread thread1 = new(M2);
+        Thread thread1 = new(M1);
         thread1.Start();
         thread1.Join();
 
-        MyTraceResult traceResult = Tracer.GetTraceResult();
+        Trace.TraceResult traceResult = Tracer.GetTraceResult();
         Console.WriteLine(traceResult);
 
     }

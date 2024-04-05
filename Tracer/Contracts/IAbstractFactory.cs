@@ -8,7 +8,10 @@ using Trace = Tracer.TraceResult;
 
 namespace Tracer.Contracts
 {
-
+    /// <summary>
+    /// Deprecated
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IDelegateAbstractFactory<T> where T : Delegate
     {
         T CreateSnapshot();

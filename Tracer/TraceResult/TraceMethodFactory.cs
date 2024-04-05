@@ -1,58 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Tracer.Contracts;
 using Trace = Tracer.TraceResult;
 
 namespace Tracer.TraceResult
 {
 
-    public delegate Trace.TraceResult TraceFabric();
+    public delegate Trace.TraceMethod Fabric();
 
-    public class TraceResultManufactory
+    public class TraceMethodFactory
     {
+        private readonly int _passageDepth;
+        private readonly int _innerPassageDepth = 2;
+        public TraceMethodFactory(int passagaDepth) { 
+
+            _passageDepth = passagaDepth + _innerPassageDepth;
+        }
 
         private List<DateTime> _timeMarks = new();
-        protected void MarkCall()
+        public void CaptureFabric()
         {
             _timeMarks.Add(DateTime.UtcNow);
         }
 
-        protected List<TraceFabric> _inventory = new List<TraceFabric>();
-        protected void WriteData(TraceFabric oper)
+        protected List<Fabric> _inventory = new List<Fabric>();
+        public void WriteData(Fabric oper)
         {
 
             _inventory.Add(oper);
         }
 
-        public TraceResult ReadData()
+        public TraceMethod ReadData()
         {
-            List<TraceResult> products = new();
+            List<TraceMethod> products = new();
             foreach (var item in _inventory)
             {
-                TraceResult traceResult = item();
-                products.Add(traceResult);
+                var traceMethod = item();
+                products.Add(traceMethod);
             }
 
-            return products[products.Count - 1];
-            return new TraceResult();
+            return products[products.Count - 1]; //<!----
         }
 
-        protected void CaptureFabric()
+        public void Fabric()
         {
 
             StackTrace stackTrace = new();
             int index = _timeMarks.Count;
 
-            TraceFabric fabric = delegate () {
+            Fabric fabric = delegate () {
 
-                TimeSpan TakenTime = _timeMarks[index] - _timeMarks[index - 1];
+                TimeSpan TakenTime = _timeMarks[index - 1] - _timeMarks[index - 2];
 
-                var callingFrame = stackTrace.GetFrame(3);
+                var callingFrame = stackTrace.GetFrame(_passageDepth);
                 var callingMethod = callingFrame?.GetMethod();
                 var declaringType = callingMethod?.DeclaringType;
 
@@ -65,7 +64,7 @@ namespace Tracer.TraceResult
                  * Parsing of stackTrace and creating of Recursive MyTraceResultStructure result
                  */
 
-                return new TraceResult();
+                return new TraceMethod("", "", new TimeSpan()); //<!-----
             };
 
             WriteData(fabric);
@@ -76,7 +75,7 @@ namespace Tracer.TraceResult
         /// </summary>
         /// <param name="stackTrace"></param>
         /// <returns></returns>
-        public static TraceResult ParseStackTrace(string stackTrace)
+        public static TraceMethod ParseStackTrace(string stackTrace)
         {
             // Regular expression pattern to match the namespace, class, and method information
             string pattern = @"(?<=at )([^\.]+)\.([^\.]+)\.([^\.]+)";
@@ -96,7 +95,7 @@ namespace Tracer.TraceResult
                     string methodName = match.Groups[3].Value;
 
                     // Create and return the StackTraceInformation object
-                    return new TraceResult(namespaceName, className, methodName, new TimeSpan());
+                    return new TraceMethod(methodName, className, new TimeSpan());
                 }
             }
 

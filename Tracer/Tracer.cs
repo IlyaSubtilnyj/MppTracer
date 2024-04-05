@@ -1,41 +1,67 @@
-﻿using System;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Diagnostics;
-using System.Numerics;
-using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
-using System.Data.SqlTypes;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using Trace = Tracer.TraceResult;
-using Tracer.Contracts;
 using Tracer.TraceResult;
+using Trace = Tracer.TraceResult;
 
 namespace Tracer;
 
-public class Tracer : ITracer
+class LogicalException : Exception
 {
+    public LogicalException(string message) : base(message)
+    {
+    }
+}
 
-    private Trace.ExtrusiveHost host = new Trace.ExtrusiveHost();
+public sealed class Tracer : ITracer
+{
+    private ConcurrentDictionary<int, Trace.TMFKeepAlive> _threadTraces = new();
 
     public void StartTrace()
     {
-        host.Release();
+        Host().Suspend();
     }
 
     public void StopTrace()
     {
-        host.Seize();
+        Host().Send();
     }
 
     public Trace.TraceResult GetTraceResult()
     {
+        Trace.TraceResult result = new Trace.TraceResult();
+
+        foreach (KeyValuePair<int, TMFKeepAlive> pair in _threadTraces)
+        {
+
+            result.appendThread(pair.Key, pair.Value.Read());
+        }
        
-        return host.ReadData();
+        return result;//<!------_threadTraces.Last().Value.Read();
+    }
+
+    private Trace.TMFKeepAlive Host([CallerMemberName] string method = "")
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Trace.TMFKeepAlive? host = null;
+
+        if (method.Equals("StartTrace"))
+        {
+            if (!_threadTraces.TryGetValue(threadId, out host))
+            {
+                host = new Trace.TMFKeepAlive();
+                _threadTraces[threadId] = host;
+            }
+        }
+        else
+        {
+            if (!_threadTraces.TryGetValue(threadId, out host))
+            {
+                throw new LogicalException($"Not exists. Called from {method}");
+            }
+        }
+
+        return host;
     }
 
 }

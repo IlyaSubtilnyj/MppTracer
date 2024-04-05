@@ -12,33 +12,30 @@ using System.Data.SqlTypes;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Trace = Tracer.TraceResult;
+using Tracer.Contracts;
+using Tracer.TraceResult;
 
 namespace Tracer;
 
 public class Tracer : ITracer
 {
 
-    private int depth = 0;
-
     private Trace.ExtrusiveHost host = new Trace.ExtrusiveHost();
 
     public void StartTrace()
     {
-        host.Ping();
-        depth++;
+        host.Release();
     }
 
     public void StopTrace()
     {
-        host.Ping(depth);
-        depth--;
+        host.Seize();
     }
 
     public Trace.TraceResult GetTraceResult()
     {
-        Console.WriteLine("Finish methods here");
-        host.call();
-        return host.Retrieve();
+       
+        return host.ReadData();
     }
 
 }

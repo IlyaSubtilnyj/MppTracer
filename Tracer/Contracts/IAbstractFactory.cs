@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,8 @@ using Trace = Tracer.TraceResult;
 namespace Tracer.Contracts
 {
 
-    public delegate Trace.TraceResult PrintOperation();
-
-    public interface IAbstractFactory
+    public interface IDelegateAbstractFactory<T> where T : Delegate
     {
-        PrintOperation CreateTraceResult(int link);
-
+        T CreateSnapshot();
     }
 }

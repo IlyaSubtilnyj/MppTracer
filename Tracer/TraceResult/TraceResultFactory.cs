@@ -5,27 +5,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tracer.Contracts;
+using Trace = Tracer.TraceResult;
 
 namespace Tracer.TraceResult
 {
 
-    class TraceResultFactory : IAbstractFactory
+    class TraceResultFactory : IDelegateAbstractFactory<TraceFabric>
     {
-        public PrintOperation CreateTraceResult(int link)
-        {
 
-            return lCreateTraceResult(link);
+        List<DateTime> times;
+
+        public TraceResultFactory(List<DateTime> times)
+        {
+            this.times = times;
         }
 
-        PrintOperation lCreateTraceResult(int link)
+        public TraceFabric CreateSnapshot()
         {
-            var stackTrace = new StackTrace();
-            TraceResult Inner()
-            {
-                TraceResult result = new TraceResult();
-                //Thread.Sleep(2000);
 
-                TimeSpan executionTimeSpan = DateTime.UtcNow.Subtract(DateTime.UtcNow);
+            var stackTrace = new StackTrace();
+            var index = times.Count;
+
+            TraceFabric printX = delegate () {
+
+                TraceResult result = new TraceResult();
+
+                TimeSpan executionTimeSpan = times.Last() - times.Last();
 
                 var callingFrame = stackTrace.GetFrame(5);
                 var callingMethod = callingFrame?.GetMethod();
@@ -41,8 +46,10 @@ namespace Tracer.TraceResult
                  */
 
                 return result;
-            }
-            return Inner;
+            };
+
+
+            return printX;
         }
 
     }

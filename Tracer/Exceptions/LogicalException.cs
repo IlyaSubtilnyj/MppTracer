@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Tracer.Exceptions
 {
 
-    class LogicalException : Exception
+    public class LogicalException : Exception
     {
         public LogicalException(string message) : base(message)
         {

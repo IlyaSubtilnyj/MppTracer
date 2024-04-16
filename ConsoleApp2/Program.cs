@@ -52,7 +52,7 @@ class Program
 
         IWriter cwriter = new ConsoleWriter();
         IWriter fwriter = new FileWriter("lol.txt");
-        ITraceResultSerializer serializer = new XmlSerializer();
+        ITraceResultSerializer serializer = new JsonSerializer();
 
         cwriter.Write(serializer.Serialize(traceResult));
     }

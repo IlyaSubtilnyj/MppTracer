@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tracer.TraceResult
+namespace Tracer.workspace.output
 {
-    public class TraceThread
+    public interface IWriter
     {
-
+        void Write(string data);
     }
 }

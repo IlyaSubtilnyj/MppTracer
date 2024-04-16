@@ -1,4 +1,8 @@
-﻿using Trace = Tracer.TraceResult;
+﻿using Tracer;
+using Tracer.Serialization;
+using Tracer.Serialization.Json;
+using Tracer.Serialization.Xml;
+using Tracer.workspace.output;
 
 namespace ConsoleApp2;
 
@@ -11,7 +15,7 @@ class Program
     {
         Tracer.StartTrace();
 
-        Thread.Sleep(500);
+        Thread.Sleep(1000);
 
         Tracer.StopTrace();
     }
@@ -20,18 +24,22 @@ class Program
     {
         Tracer.StartTrace();
 
-        Thread.Sleep(1000);
         M2();
-        //M2();
-
+        Thread.Sleep(500);
+        
+        //thread.Join();
         Tracer.StopTrace();
+    }
+
+    private static void M()
+    {
+        M2();
     }
 
     public static void Main(string[] args)
     {
-        
-        Thread thread1 = new(M1);
 
+        Thread thread1 = new(M1);
         Thread thread2 = new(M2);
 
         thread1.Start();
@@ -40,8 +48,12 @@ class Program
         thread1.Join();
         thread2.Join();
 
-        Trace.TraceResult traceResult = Tracer.GetTraceResult();
-        Console.WriteLine(traceResult);
+        TraceResult traceResult = Tracer.GetTraceResult();
 
+        IWriter cwriter = new ConsoleWriter();
+        IWriter fwriter = new FileWriter("lol.txt");
+        ITraceResultSerializer serializer = new XmlSerializer();
+
+        cwriter.Write(serializer.Serialize(traceResult));
     }
 }
